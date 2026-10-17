@@ -1,0 +1,39 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Copy locally installed skills
+
+class SkillsSourceLocator {
+  +Resolve(overrideSource: DirectoryInfo?): string
+}
+class SkillCopier {
+  -Destinations = [".agents/skills", ".claude/skills"]
+  +CopyAsync(source: string, targetPath: string, ct): Task<SkillCopyResult>
+  -IsSkill(dir: DirectoryInfo): bool
+  -CopyTree(from: DirectoryInfo, to: string, root: string, ct): void
+}
+class SkillCopyResult <<record>> {
+  +SkillCount: int
+  +SkippedLinks: IReadOnlyList<string>
+}
+class SafePath <<static>> {
+  +EnsureWithin(root: string, path: string): string
+}
+class UnsafePathException {
+  +Path: string
+}
+interface IReporter
+SkillCopier --> SkillsSourceLocator
+SkillCopier ..> SafePath : checks writes
+SkillCopier ..> SkillCopyResult : returns
+SkillCopier --> IReporter : warns
+SafePath ..> UnsafePathException : throws
+@enduml

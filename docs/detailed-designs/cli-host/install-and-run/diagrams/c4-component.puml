@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Install and run Ezra
+
+Container_Boundary(host, "Ezra") {
+  Component(csproj, "Ezra.csproj", "MSBuild", "PackAsTool, ToolCommandName=ezra, net10.0")
+  Component(program, "Program", "C# entry point", "Builds and runs the root command")
+  Component(version, "VersionOption", "System.CommandLine", "Prints the assembly informational version")
+}
+Container_Boundary(abs, "Ezra.Abstractions") {
+  Component(textfile, "TextFile", "Static helper", "UTF-8 without BOM, \\n line endings")
+}
+Component_Ext(ci, "ci.yml", "GitHub Actions", "Windows, macOS, Linux matrix")
+Rel(csproj, program, "Packs")
+Rel(program, version, "Adds to root command")
+Rel(ci, csproj, "Builds, tests and packs")
+@enduml

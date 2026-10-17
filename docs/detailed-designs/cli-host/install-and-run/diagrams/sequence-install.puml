@@ -1,0 +1,35 @@
+@startuml
+title UML sequence behaviour — Install and print version
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam sequence {
+  ParticipantBorderColor #344054
+  LifeLineBorderColor #667085
+}
+actor "Developer" as dev
+box "Frontend — Terminal" #E0F2FE
+  participant "Shell" as shell
+end box
+box "Backend — .NET SDK" #FFF4E5
+  participant "dotnet tool" as tool
+  database "NuGet feed" as feed
+end box
+box "Backend — Ezra host application" #D1FADF
+  participant "Program" as program
+  participant "RootCommand" as root
+end box
+dev -> shell : dotnet tool install --global Ezra
+shell -> tool : install Ezra
+tool -> feed : Download Ezra.nupkg
+feed --> tool : package
+tool --> shell : ezra shim on PATH (L2-001)
+dev -> shell : ezra --version
+shell -> program : Main(["--version"])
+program -> root : Parse and invoke
+root --> program : print informational version
+program --> shell : exit code 0
+shell --> dev : version text
+@enduml

@@ -1,0 +1,42 @@
+@startuml
+title UML sequence behaviour — Run a nested command
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam sequence {
+  ParticipantBorderColor #344054
+  LifeLineBorderColor #667085
+}
+actor "Developer" as dev
+box "Frontend — Terminal" #E0F2FE
+  participant "Shell" as shell
+end box
+box "Backend — Ezra host application" #D1FADF
+  participant "Program" as program
+  participant "EzraApp" as app
+  participant "System.CommandLine parser" as parser
+  participant "ParseErrorReporter" as errors
+end box
+box "Backend — Ezra.Scaffold module" #ECFDF3
+  participant "scaffold action" as action
+end box
+dev -> shell : ezra scaffold shelfie
+shell -> program : Main(args)
+program -> app : RunAsync(args)
+app -> app : BuildRoot() from modules
+app -> parser : Parse(args)
+alt command path matched (L2-003)
+  parser --> app : ParseResult for scaffold
+  app -> action : Invoke
+  action --> app : exit code
+else unknown command token
+  parser --> app : ParseResult with errors
+  app -> errors : Report(result)
+  errors -> errors : Suggest closest sibling name
+  errors --> app : stderr written, exit code 1
+end
+app --> program : exit code
+program --> shell : exit code
+@enduml

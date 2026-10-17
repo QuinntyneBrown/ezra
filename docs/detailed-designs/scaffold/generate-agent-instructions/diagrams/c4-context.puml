@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Generate agent instructions
+
+Person(dev, "Developer", "Runs ezra commands in a terminal on Windows, macOS or Linux")
+System(ezra, "Ezra", ".NET tool that hosts modular CLI commands")
+System_Ext(dotnet, ".NET SDK", "dotnet CLI and runtime that installs and runs .NET tools")
+System_Ext(agent, "AI coding agent", "Reads AGENTS.md and CLAUDE.md in the new project")
+System_Ext(fs, "Local file system", "Target folder")
+Rel(ezra, fs, "Writes AGENTS.md and CLAUDE.md to")
+Rel(agent, fs, "Reads instructions from")
+Rel(dev, ezra, "Runs commands with", "ezra <command> ...")
+Rel(dotnet, ezra, "Installs and hosts")
+@enduml

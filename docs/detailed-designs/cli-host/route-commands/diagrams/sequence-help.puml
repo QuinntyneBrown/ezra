@@ -1,0 +1,29 @@
+@startuml
+title UML sequence behaviour — Show help
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam sequence {
+  ParticipantBorderColor #344054
+  LifeLineBorderColor #667085
+}
+actor "Developer" as dev
+box "Frontend — Terminal" #E0F2FE
+  participant "Shell" as shell
+end box
+box "Backend — Ezra host application" #D1FADF
+  participant "EzraApp" as app
+  participant "System.CommandLine parser" as parser
+  participant "HelpAction" as help
+end box
+dev -> shell : ezra scaffold --help
+shell -> app : RunAsync(args)
+app -> parser : Parse(args)
+parser --> app : ParseResult with help option
+app -> help : Invoke
+help -> help : Render usage, description, arguments, options, defaults, allowed values (L2-004)
+help --> app : exit code 0
+app --> shell : exit code 0
+@enduml

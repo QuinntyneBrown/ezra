@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Copy locally installed skills
+
+Container_Boundary(scaffold, "Ezra.Scaffold") {
+  Component(handler, "ScaffoldCommandHandler", "ICommandHandler", "Calls the copier, prints the count")
+  Component(locator, "SkillsSourceLocator", "C# class", "Default or --skills-source")
+  Component(copier, "SkillCopier", "C# class", "Finds and copies skills")
+  Component(safe, "SafePath", "Static helper", "Refuses writes outside the target")
+}
+Container_Boundary(host, "Ezra") {
+  Component(reporter, "ConsoleReporter", "IReporter", "Warnings for missing source and links")
+}
+System_Ext(fs, "Local file system", "Skills source and target folder")
+Rel(handler, locator, "Resolves source with")
+Rel(handler, copier, "CopyAsync")
+Rel(copier, safe, "Checks each write with")
+Rel(copier, reporter, "Warns through")
+Rel(copier, fs, "Reads and writes")
+@enduml

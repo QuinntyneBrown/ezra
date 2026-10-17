@@ -1,0 +1,27 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Install and run Ezra
+
+class Program {
+  +Main(args: string[]): Task<int>
+}
+class RootCommand <<System.CommandLine>> {
+  +Options: IList<Option>
+}
+class VersionOption <<System.CommandLine>>
+class TextFile <<static>> {
+  +WriteAsync(path: string, content: string, ct: CancellationToken): Task
+  -Normalise(content: string): string
+}
+Program ..> RootCommand : builds
+RootCommand *-- VersionOption : owns
+@enduml

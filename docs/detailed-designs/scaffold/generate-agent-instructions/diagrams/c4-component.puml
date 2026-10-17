@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Generate agent instructions
+
+Container_Boundary(scaffold, "Ezra.Scaffold") {
+  Component(handler, "ScaffoldCommandHandler", "ICommandHandler", "Calls the generator")
+  Component(gen, "AgentInstructionsGenerator", "C# class", "Renders and writes both files")
+  Component(loader, "TemplateLoader", "C# class", "Reads embedded resources")
+  Component(tpl, "Templates/AGENTS.md", "Embedded resource", "Template with two tokens")
+}
+Container_Boundary(abs, "Ezra.Abstractions") {
+  Component(textfile, "TextFile", "Static helper", "UTF-8 without BOM, \\n line endings")
+}
+System_Ext(fs, "Local file system", "Target folder")
+Rel(handler, gen, "WriteAsync")
+Rel(gen, loader, "Loads template with")
+Rel(loader, tpl, "Reads")
+Rel(gen, textfile, "Writes through")
+Rel(textfile, fs, "Writes AGENTS.md, CLAUDE.md")
+@enduml

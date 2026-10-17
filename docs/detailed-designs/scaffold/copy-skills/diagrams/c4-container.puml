@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Copy locally installed skills
+
+Person(dev, "Developer", "Runs ezra in a terminal")
+System_Boundary(ezra, "Ezra .NET tool package") {
+  Container(host, "Ezra", ".NET 10 console app", "Root host: startup, global options, routing, exit codes")
+  Container(abs, "Ezra.Abstractions", ".NET class library", "Module contract and shared interfaces")
+  Container(scaffold, "Ezra.Scaffold", ".NET class library", "Tool module providing ezra scaffold")
+}
+System_Ext(fs, "Local file system", "~/.claude/skills and the target folder")
+Rel(dev, host, "Invokes", "command line")
+Rel(host, scaffold, "Registers and routes to", "IEzraModule")
+Rel(host, abs, "Implements host services of")
+Rel(scaffold, abs, "Depends only on")
+Rel(scaffold, fs, "Reads skills source, writes skill destinations")
+@enduml

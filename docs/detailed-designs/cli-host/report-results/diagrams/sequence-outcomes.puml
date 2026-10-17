@@ -1,0 +1,45 @@
+@startuml
+title UML sequence behaviour — Map a command outcome to an exit code
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam sequence {
+  ParticipantBorderColor #344054
+  LifeLineBorderColor #667085
+}
+actor "Developer" as dev
+box "Frontend — Terminal" #E0F2FE
+  participant "Shell" as shell
+end box
+box "Backend — Ezra host application" #D1FADF
+  participant "EzraApp" as app
+  participant "ExceptionMapper" as mapper
+  participant "ConsoleReporter" as reporter
+end box
+box "Backend — Tool module" #ECFDF3
+  participant "Command handler" as handler
+end box
+dev -> shell : ezra <command> [--verbose|--quiet]
+shell -> app : RunAsync(args, ct)
+app -> reporter : Configure verbosity and colour (L2-008)
+app -> mapper : RunAsync(handler action)
+mapper -> handler : HandleAsync(options, ct)
+alt completes
+  handler --> mapper : 0
+  mapper --> app : 0
+else EzraUsageException
+  handler --> mapper : throws
+  mapper -> reporter : Error(message) to stderr
+  mapper --> app : 1 (L2-007)
+else OperationCanceledException (Ctrl+C)
+  handler --> mapper : throws
+  mapper --> app : 130 (L2-007)
+else any other exception
+  handler --> mapper : throws
+  mapper -> reporter : Error(message), stack trace only if --verbose
+  mapper --> app : 2 (L2-007)
+end
+app --> shell : exit code
+@enduml

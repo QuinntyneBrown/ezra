@@ -1,0 +1,57 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Scaffold a project
+
+class ScaffoldModule {
+  +Name = "scaffold"
+  +ConfigureServices(services): void
+  +CreateCommand(services): Command
+}
+class ScaffoldOptions <<record>> {
+  +Name: string
+  +Backend: Backend
+  +OutputDirectory: DirectoryInfo
+  +SkillsSource: DirectoryInfo?
+  +Force: bool
+}
+enum Backend {
+  Node
+}
+class ScaffoldCommandHandler {
+  +HandleAsync(options: ScaffoldOptions, ct): Task<int>
+}
+class ProjectNameValidator {
+  +Validate(name: string): void
+}
+class TargetFolderGuard {
+  +Resolve(options: ScaffoldOptions): string
+}
+class ScaffoldTransaction {
+  -targetPath: string
+  -existedBefore: bool
+  +Commit(): void
+  +DisposeAsync(): ValueTask
+}
+class AgentInstructionsGenerator
+class SkillCopier
+interface IEzraModule
+interface "ICommandHandler<ScaffoldOptions>" as H
+ScaffoldModule ..|> IEzraModule
+ScaffoldCommandHandler ..|> H
+ScaffoldOptions --> Backend
+ScaffoldCommandHandler ..> ScaffoldOptions
+ScaffoldCommandHandler --> ProjectNameValidator
+ScaffoldCommandHandler --> TargetFolderGuard
+ScaffoldCommandHandler ..> ScaffoldTransaction : creates
+ScaffoldCommandHandler --> AgentInstructionsGenerator
+ScaffoldCommandHandler --> SkillCopier
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Generate agent instructions
+
+class AgentInstructionsGenerator {
+  -AgentsTemplate = "Templates/AGENTS.md"
+  -ClaudePointer = "@AGENTS.md\\n"
+  +WriteAsync(targetPath: string, name: string, backend: Backend, ct): Task
+}
+class TemplateLoader {
+  +Load(resourceName: string): string
+}
+class TextFile <<static>> {
+  +WriteAsync(path: string, content: string, ct): Task
+}
+enum Backend {
+  Node
+}
+class BackendExtensions <<static>> {
+  +DisplayName(backend: Backend): string
+}
+AgentInstructionsGenerator --> TemplateLoader
+AgentInstructionsGenerator ..> TextFile : writes with
+AgentInstructionsGenerator ..> Backend
+BackendExtensions ..> Backend
+@enduml

@@ -1,0 +1,50 @@
+@startuml
+title UML sequence behaviour — Copy skills
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam sequence {
+  ParticipantBorderColor #344054
+  LifeLineBorderColor #667085
+}
+actor "Developer" as dev
+box "Frontend — Terminal" #E0F2FE
+  participant "Shell" as shell
+end box
+box "Backend — Ezra.Scaffold module" #ECFDF3
+  participant "ScaffoldCommandHandler" as handler
+  participant "SkillsSourceLocator" as locator
+  participant "SkillCopier" as copier
+  participant "SafePath" as safe
+end box
+box "Backend — Ezra host application" #D1FADF
+  participant "ConsoleReporter" as reporter
+end box
+box "Backend — Infrastructure" #FFF4E5
+  database "File system" as fs
+end box
+dev -> shell : ezra scaffold shelfie --backend node
+shell -> handler : HandleAsync(options)
+handler -> locator : Resolve(--skills-source) (L2-012)
+locator --> handler : ~/.claude/skills or override
+handler -> copier : CopyAsync(source, target)
+copier -> fs : List child folders of source
+alt source missing or no SKILL.md folders
+  copier -> reporter : Warning naming resolved path (L2-012)
+  copier --> handler : SkillCount = 0
+else skills found
+  loop each skill, each destination, each entry
+    alt entry is a symbolic link
+      copier -> reporter : Warning, skip without reading (L2-015)
+    else regular file
+      copier -> safe : EnsureWithin(target, destPath) (L2-015)
+      safe --> copier : full path or UnsafePathException (exit 2)
+      copier -> fs : File.Copy, no execution (L2-015)
+    end
+  end
+  copier --> handler : SkillCopyResult
+end
+handler --> shell : summary with skill count
+@enduml

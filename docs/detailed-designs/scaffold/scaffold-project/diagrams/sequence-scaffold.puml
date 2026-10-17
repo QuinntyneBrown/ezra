@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — Scaffold a project
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam sequence {
+  ParticipantBorderColor #344054
+  LifeLineBorderColor #667085
+}
+actor "Developer" as dev
+box "Frontend — Terminal" #E0F2FE
+  participant "Shell" as shell
+end box
+box "Backend — Ezra host application" #D1FADF
+  participant "EzraApp" as app
+end box
+box "Backend — Ezra.Scaffold module" #ECFDF3
+  participant "ScaffoldCommandHandler" as handler
+  participant "ProjectNameValidator" as validator
+  participant "TargetFolderGuard" as guard
+  participant "ScaffoldTransaction" as tx
+  participant "AgentInstructionsGenerator" as gen
+  participant "SkillCopier" as copier
+end box
+box "Backend — Infrastructure" #FFF4E5
+  database "File system" as fs
+end box
+dev -> shell : ezra scaffold shelfie --backend node
+shell -> app : RunAsync(args)
+app -> handler : HandleAsync(ScaffoldOptions)
+handler -> validator : Validate("shelfie") (L2-013)
+alt invalid name
+  validator --> handler : EzraUsageException
+  handler --> app : exit code 1, nothing written
+end
+handler -> guard : Resolve(options) (L2-014)
+guard -> fs : Does target exist and is it non-empty?
+fs --> guard : answer
+alt non-empty and no --force
+  guard --> handler : EzraUsageException suggesting --force
+  handler --> app : exit code 1, nothing changed
+end
+guard --> handler : target path
+handler -> tx : Begin(target), record existedBefore (L2-016)
+handler -> gen : Write AGENTS.md and CLAUDE.md
+gen -> fs : write files
+handler -> copier : Copy skills
+copier -> fs : copy skill folders
+alt all steps succeed
+  handler -> tx : Commit()
+  handler --> app : "Created <path> with <n> skills", exit code 0 (L2-009)
+else failure or Ctrl+C
+  tx -> fs : Delete target if created by this run (L2-016)
+  handler --> app : exit code 2 or 130
+end
+@enduml

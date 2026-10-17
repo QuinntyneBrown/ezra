@@ -1,0 +1,23 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Scaffold a project
+
+Container_Boundary(scaffold, "Ezra.Scaffold") {
+  Component(module, "ScaffoldModule", "IEzraModule", "Registers services, builds the scaffold command")
+  Component(handler, "ScaffoldCommandHandler", "ICommandHandler", "Orchestrates one scaffold run")
+  Component(validator, "ProjectNameValidator", "C# class", "Name rules (L2-013)")
+  Component(guard, "TargetFolderGuard", "C# class", "No overwrite without --force (L2-014)")
+  Component(tx, "ScaffoldTransaction", "C# class", "Removes partial output (L2-016)")
+  Component(gen, "AgentInstructionsGenerator", "C# class", "AGENTS.md and CLAUDE.md")
+  Component(copier, "SkillCopier", "C# class", "Copies skills")
+}
+System_Ext(fs, "Local file system", "Target folder")
+Rel(module, handler, "Registers")
+Rel(handler, validator, "Validates name with")
+Rel(handler, guard, "Checks target with")
+Rel(handler, tx, "Scopes run with")
+Rel(handler, gen, "Generates instructions with")
+Rel(handler, copier, "Copies skills with")
+Rel(tx, fs, "Deletes created folder on failure")
+@enduml

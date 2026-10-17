@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Generate agent instructions
+
+Person(dev, "Developer", "Runs ezra in a terminal")
+System_Boundary(ezra, "Ezra .NET tool package") {
+  Container(host, "Ezra", ".NET 10 console app", "Root host: startup, global options, routing, exit codes")
+  Container(abs, "Ezra.Abstractions", ".NET class library", "Module contract and shared interfaces")
+  Container(scaffold, "Ezra.Scaffold", ".NET class library", "Tool module providing ezra scaffold")
+}
+System_Ext(fs, "Local file system", "Target folder")
+Rel(dev, host, "Invokes", "command line")
+Rel(host, scaffold, "Registers and routes to", "IEzraModule")
+Rel(host, abs, "Implements host services of")
+Rel(scaffold, abs, "Depends only on")
+Rel(scaffold, fs, "Writes AGENTS.md and CLAUDE.md")
+@enduml

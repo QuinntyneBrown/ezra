@@ -1,0 +1,47 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Report results and exit codes
+
+class ExitCodes <<static>> {
+  +Success = 0
+  +UsageError = 1
+  +RuntimeFailure = 2
+  +Cancelled = 130
+}
+interface IReporter {
+  +Info(message: string): void
+  +Verbose(message: string): void
+  +Warning(message: string): void
+  +Error(message: string): void
+}
+enum Verbosity {
+  Quiet
+  Normal
+  Verbose
+}
+class ConsoleReporter {
+  -verbosity: Verbosity
+  -useColour: bool
+}
+class ExceptionMapper {
+  +RunAsync(action: Func<CancellationToken, Task<int>>, ct: CancellationToken): Task<int>
+}
+class EzraUsageException
+class MissingCapabilityException
+class DuplicateCommandException
+ConsoleReporter ..|> IReporter
+ConsoleReporter --> Verbosity
+EzraUsageException <|-- MissingCapabilityException
+EzraUsageException <|-- DuplicateCommandException
+ExceptionMapper ..> ExitCodes : returns
+ExceptionMapper ..> IReporter : reports errors
+@enduml

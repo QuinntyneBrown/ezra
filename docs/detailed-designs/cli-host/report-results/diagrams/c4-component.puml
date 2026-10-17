@@ -1,0 +1,24 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Report results and exit codes
+
+Container_Boundary(host, "Ezra") {
+  Component(mapper, "ExceptionMapper", "C# class", "Maps outcomes to exit codes")
+  Component(reporter, "ConsoleReporter", "IReporter", "Verbosity, stdout/stderr, NO_COLOR")
+  Component(globals, "Global options", "System.CommandLine", "--verbose, --quiet")
+}
+Container_Boundary(abs, "Ezra.Abstractions") {
+  Component(ireporter, "IReporter", "Interface", "Reporting contract for modules")
+  Component(codes, "ExitCodes", "Constants", "0, 1, 2, 130")
+  Component(usage, "EzraUsageException", "Exception", "Usage and validation errors")
+}
+Container_Boundary(scaffold, "Ezra.Scaffold") {
+  Component(handler, "ScaffoldCommandHandler", "ICommandHandler", "Reports steps and throws on failure")
+}
+Rel(handler, ireporter, "Reports through")
+Rel(handler, usage, "Throws")
+Rel(mapper, codes, "Returns")
+Rel(reporter, ireporter, "Implements")
+Rel(globals, reporter, "Configures verbosity of")
+@enduml

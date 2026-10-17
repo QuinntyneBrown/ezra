@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Route commands and show help
+
+Container_Boundary(host, "Ezra") {
+  Component(app, "EzraApp", "C# class", "Builds the command tree, parses, invokes")
+  Component(root, "RootCommand", "System.CommandLine", "Root of the command tree")
+  Component(errors, "ParseErrorReporter", "C# class", "Writes parse errors to stderr")
+  Component(suggest, "CommandSuggester", "C# class", "Closest-name suggestion")
+}
+Container_Boundary(scaffold, "Ezra.Scaffold") {
+  Component(cmd, "scaffold Command", "System.CommandLine", "Top-level command subtree")
+}
+Rel(app, root, "Builds and parses with")
+Rel(root, cmd, "Contains")
+Rel(app, errors, "Delegates parse errors to")
+Rel(errors, suggest, "Asks for suggestion")
+@enduml

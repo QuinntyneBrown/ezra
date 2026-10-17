@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Report results and exit codes
+
+Person(dev, "Developer", "Runs ezra commands in a terminal on Windows, macOS or Linux")
+System(ezra, "Ezra", ".NET tool that hosts modular CLI commands")
+System_Ext(dotnet, ".NET SDK", "dotnet CLI and runtime that installs and runs .NET tools")
+
+Rel(dev, ezra, "Runs commands with", "ezra <command> ...")
+Rel(dotnet, ezra, "Installs and hosts")
+@enduml

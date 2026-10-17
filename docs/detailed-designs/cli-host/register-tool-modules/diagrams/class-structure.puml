@@ -1,0 +1,46 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Register tool modules
+
+interface IEzraModule {
+  +Name: string
+  +ConfigureServices(services: IServiceCollection): void
+  +CreateCommand(services: IServiceProvider): Command
+}
+interface "ICommandHandler<TOptions>" as Handler {
+  +HandleAsync(options: TOptions, ct: CancellationToken): Task<int>
+}
+class ServiceProviderExtensions <<static>> {
+  +GetCapability<T>(services: IServiceProvider): T
+}
+class MissingCapabilityException {
+  +CapabilityType: Type
+}
+class EzraApp {
+  -modules: IReadOnlyList<IEzraModule>
+  +RunAsync(args: string[], ct: CancellationToken): Task<int>
+}
+class ModuleRegistry {
+  +Validate(modules: IReadOnlyList<IEzraModule>): void
+}
+class DuplicateCommandException {
+  +CommandName: string
+  +FirstModule: Type
+  +SecondModule: Type
+}
+class ScaffoldModule
+ScaffoldModule ..|> IEzraModule
+EzraApp "1" o-- "*" IEzraModule : composes
+EzraApp ..> ModuleRegistry : validates with
+ModuleRegistry ..> DuplicateCommandException : throws
+ServiceProviderExtensions ..> MissingCapabilityException : throws
+@enduml

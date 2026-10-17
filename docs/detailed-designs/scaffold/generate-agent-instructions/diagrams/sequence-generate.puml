@@ -1,0 +1,38 @@
+@startuml
+title UML sequence behaviour — Generate AGENTS.md and CLAUDE.md
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam sequence {
+  ParticipantBorderColor #344054
+  LifeLineBorderColor #667085
+}
+actor "Developer" as dev
+box "Frontend — Terminal" #E0F2FE
+  participant "Shell" as shell
+end box
+box "Backend — Ezra.Scaffold module" #ECFDF3
+  participant "ScaffoldCommandHandler" as handler
+  participant "AgentInstructionsGenerator" as gen
+  participant "TemplateLoader" as loader
+end box
+box "Backend — Ezra.Abstractions" #ECFDF3
+  participant "TextFile" as tf
+end box
+box "Backend — Infrastructure" #FFF4E5
+  database "File system" as fs
+end box
+dev -> shell : ezra scaffold shelfie --backend node
+shell -> handler : HandleAsync(options)
+handler -> gen : WriteAsync(target, "shelfie", Node)
+gen -> loader : Load("Templates/AGENTS.md")
+loader --> gen : template text
+gen -> gen : Replace {{ProjectName}} = shelfie, {{Backend}} = Node.js (L2-010)
+gen -> tf : WriteAsync(target/AGENTS.md)
+tf -> fs : UTF-8 no BOM, \\n endings
+gen -> tf : WriteAsync(target/CLAUDE.md, "@AGENTS.md\\n") (L2-011)
+tf -> fs : write
+gen --> handler : done
+@enduml

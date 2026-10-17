@@ -1,0 +1,38 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Route commands and show help
+
+class EzraApp {
+  +RunAsync(args: string[], ct: CancellationToken): Task<int>
+  -BuildRoot(): RootCommand
+}
+class "Command <<System.CommandLine>>" as Command {
+  +Name: string
+  +Description: string
+  +Subcommands: IList<Command>
+  +Arguments: IList<Argument>
+  +Options: IList<Option>
+  +SetAction(action)
+}
+class "RootCommand <<System.CommandLine>>" as RootCommand
+class ParseErrorReporter {
+  +Report(result: ParseResult): int
+}
+class CommandSuggester {
+  +Suggest(token: string, siblings: IEnumerable<string>): string?
+}
+Command <|-- RootCommand
+Command "1" *-- "*" Command : subcommands
+EzraApp ..> RootCommand : builds
+EzraApp ..> ParseErrorReporter : uses
+ParseErrorReporter ..> CommandSuggester : uses
+@enduml

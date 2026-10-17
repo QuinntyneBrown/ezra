@@ -1,0 +1,24 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Register tool modules
+
+Container_Boundary(host, "Ezra") {
+  Component(program, "Program.Modules", "C# list", "Explicit module registrations")
+  Component(app, "EzraApp", "C# class", "Composes modules into one container and one tree")
+  Component(registry, "ModuleRegistry", "C# class", "Rejects duplicate top-level names")
+  Component(sp, "ServiceProvider", "Microsoft.Extensions.DependencyInjection", "Resolves handlers and capabilities")
+}
+Container_Boundary(abs, "Ezra.Abstractions") {
+  Component(contract, "IEzraModule", "Interface", "Module contract")
+  Component(cap, "Capability interfaces", "Interfaces", "Cross-module services")
+}
+Container_Boundary(scaffold, "Ezra.Scaffold") {
+  Component(mod, "ScaffoldModule", "IEzraModule", "Registers scaffold services and command")
+}
+Rel(program, mod, "Lists")
+Rel(app, registry, "Validates modules with")
+Rel(app, sp, "Builds")
+Rel(mod, contract, "Implements")
+Rel(mod, cap, "Consumes or implements")
+@enduml

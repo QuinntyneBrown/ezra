@@ -1,0 +1,40 @@
+@startuml
+title UML sequence behaviour — Call another module's capability
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam sequence {
+  ParticipantBorderColor #344054
+  LifeLineBorderColor #667085
+}
+actor "Developer" as dev
+box "Frontend — Terminal" #E0F2FE
+  participant "Shell" as shell
+end box
+box "Backend — Consumer tool module" #ECFDF3
+  participant "Consumer handler" as handler
+end box
+box "Backend — Ezra host application" #D1FADF
+  participant "ServiceProvider" as sp
+  participant "EzraApp" as app
+end box
+box "Backend — Provider tool module" #ECFDF3
+  participant "Capability implementation" as impl
+end box
+dev -> shell : ezra consumer-command
+shell -> app : RunAsync(args)
+app -> handler : HandleAsync(options)
+handler -> sp : GetCapability<ICapability>()
+alt provider module registered (L2-006)
+  sp --> handler : implementation
+  handler -> impl : Call in-process
+  impl --> handler : result
+  handler --> app : exit code 0
+else no provider registered
+  sp --> handler : MissingCapabilityException
+  handler --> app : exception propagates
+  app --> shell : stderr names capability, exit code 1
+end
+@enduml
