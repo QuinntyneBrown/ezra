@@ -1,5 +1,40 @@
 # Ezra
 
+Ezra is a cross-platform .NET CLI, installed as a .NET tool (`ezra`). It hosts many commands with nested subcommands, in the style of `dotnet ef migrations add`. Requirements live in `docs/specs/L1.md` and `docs/specs/L2.md`.
+
+## Folder structure (MANDATORY)
+
+```
+ezra/
+├── docs/
+│   └── specs/                      # L1.md, L2.md
+├── src/
+│   ├── Ezra/                       # root host: the packed .NET tool (ToolCommandName = ezra)
+│   │   ├── Program.cs              # builds the host, registers every module, runs the parser
+│   │   └── Ezra.csproj             # references each Ezra.<Tool> project so they ship in one package
+│   ├── Ezra.Abstractions/          # the module contract and cross-tool service interfaces only
+│   └── Ezra.<Tool>/                # one project per tool, e.g. Ezra.Scaffold
+│       ├── <Tool>Module.cs         # implements IEzraModule: registers services, contributes the root command
+│       ├── Commands/               # one file per command or subcommand
+│       ├── Services/               # the tool's logic, behind interfaces
+│       └── Templates/              # embedded resources (e.g. the AGENTS.md template)
+├── tests/
+│   └── Ezra.AcceptanceTests/       # acceptance tests with a "Traces to: L2-xxx" header
+├── Ezra.slnx
+└── .agents/ .claude/
+```
+
+*   **One tool, one project:** every tool is its own `Ezra.<Tool>` project. Never put one tool's commands or logic in another tool's project or in the root host.
+*   **Dependencies point one way:** `Ezra` → `Ezra.<Tool>` → `Ezra.Abstractions`. A tool never references another tool or the root host. `Ezra.Abstractions` references nothing in the solution.
+*   **The root host is thin:** it holds startup, global options (`--verbose`, `--quiet`), error handling and exit codes only. No command logic lives there.
+
+## How tools are defined and orchestrated
+
+*   **The module contract:** `Ezra.Abstractions` defines `IEzraModule`. A module does two things: it registers its services with the dependency-injection container, and it returns its one top-level command (for example `scaffold`). Registering commands must do no I/O, so startup stays fast however many tools exist.
+*   **Defining subcommands:** a tool's top-level command is a `System.CommandLine` `Command`. Each subcommand is its own class in `Commands/` and is added as a child of its parent command, to any depth (`ezra <tool> <sub> <sub>`). Each command declares its arguments, options, descriptions, defaults and allowed values, so help and validation come from the declaration. A handler stays thin: it parses input and calls a service from `Services/`.
+*   **Registering a tool:** add a project reference from `Ezra` to the new `Ezra.<Tool>`, then add one line for its module in `Program.cs`. Adding a tool must not change any other tool. If two modules claim the same top-level command name, startup fails.
+*   **Orchestration across tools:** the root host builds one service container from every module and routes the parsed command to its handler. When one tool needs another tool's capability, the providing tool implements an interface published in `Ezra.Abstractions`, and the calling tool depends on that interface only. Calls happen in-process through dependency injection. Never reference another tool's implementation, and never shell out to `ezra`.
+
 ## Scope, Simplicity, and Zero-Waste Engineering (CRITICAL)
 
 This is the absolute highest-priority rule in this repository. AI agents tend to over-engineer, hallucinate future needs, and balloon codebase complexity. This kills project velocity and comprehensibility. You must resist this impulse. Deliver radically simple solutions that fulfill the exact prompt—nothing more.
