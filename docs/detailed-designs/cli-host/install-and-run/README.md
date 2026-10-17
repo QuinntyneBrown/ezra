@@ -15,7 +15,7 @@ This feature covers how Ezra is built, packed, installed, updated and versioned,
 - **`Directory.Build.props`** — repository-wide settings: `Nullable` enabled, `TreatWarningsAsErrors` enabled, and a single `Version` property that sets the package version.
 - **`VersionOption`** — the built-in `--version` option of the `System.CommandLine` root command. It prints the informational version of the `Ezra` assembly and returns exit code `0`.
 - **`TextFile`** — static helper in `Ezra.Abstractions`. `TextFile.WriteAsync(path, content, ct)` normalises line endings to `\n` and writes UTF-8 without a byte-order mark. Every module writes generated text through it (L2-002).
-- **Path convention** — code builds paths only with `Path.Combine`, `Path.GetFullPath` and `Environment.GetFolderPath`. No code concatenates `/` or `\\` into paths.
+- **Path convention** — code builds paths only with `Path.Combine`, `Path.GetFullPath` and `Environment.GetFolderPath`. No code concatenates `/` or `\` into paths.
 - **`.github/workflows/ci.yml`** — GitHub Actions workflow with a matrix of `ubuntu-latest`, `windows-latest` and `macos-latest`. Each leg restores, builds, runs `tests/Ezra.AcceptanceTests`, and packs the tool.
 - **`PackagingTests`** — acceptance tests in `tests/Ezra.AcceptanceTests`. They pack `Ezra` to a temporary feed, install it with `dotnet tool install --tool-path <temp>` (and with a local manifest), run `ezra --version`, and assert the output and exit code.
 - **Publishing** — the target NuGet feed and the release trigger are `<TO SUPPLY>`.
