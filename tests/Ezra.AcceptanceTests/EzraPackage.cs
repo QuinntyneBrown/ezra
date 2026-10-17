@@ -7,7 +7,11 @@ public sealed class EzraPackage : IDisposable
 
     public string Feed { get; } = Directory.CreateTempSubdirectory("ezra-feed-").FullName;
 
-    public string NewVersion() => $"0.0.0-test.{Guid.NewGuid():N}";
+    private readonly string runId = Guid.NewGuid().ToString("N");
+    private int count;
+
+    // Versions increase within a run; the run id keeps them out of the NuGet cache of earlier runs.
+    public string NewVersion() => $"0.0.{Interlocked.Increment(ref count)}-test.{runId}";
 
     public void Pack(string version)
     {
