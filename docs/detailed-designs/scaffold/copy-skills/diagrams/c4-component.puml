@@ -4,7 +4,7 @@ LAYOUT_WITH_LEGEND()
 title Components — Copy locally installed skills
 
 Container_Boundary(scaffold, "Ezra.Scaffold") {
-  Component(handler, "ScaffoldCommandHandler", "ICommandHandler", "Calls the copier, prints the count")
+  Component(handler, "ScaffoldCommandHandler", "C# class", "Calls the copier, prints the count")
   Component(locator, "SkillsSourceLocator", "C# class", "Default or --skills-source")
   Component(copier, "SkillCopier", "C# class", "Finds and copies skills")
   Component(safe, "SafePath", "Static helper", "Refuses writes outside the target")

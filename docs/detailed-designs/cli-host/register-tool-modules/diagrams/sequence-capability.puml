@@ -13,28 +13,28 @@ actor "Developer" as dev
 box "Frontend — Terminal" #E0F2FE
   participant "Shell" as shell
 end box
-box "Backend — Consumer tool module" #ECFDF3
-  participant "Consumer handler" as handler
-end box
 box "Backend — Ezra host application" #D1FADF
-  participant "ServiceProvider" as sp
   participant "EzraApp" as app
+  participant "ServiceProvider" as sp
+end box
+box "Backend — Consumer tool module" #ECFDF3
+  participant "Consumer action" as action
 end box
 box "Backend — Provider tool module" #ECFDF3
   participant "Capability implementation" as impl
 end box
 dev -> shell : ezra consumer-command
 shell -> app : RunAsync(args)
-app -> handler : HandleAsync(options)
-handler -> sp : GetCapability<ICapability>()
+app -> action : Invoke
+action -> sp : GetRequiredService<ICapability>()
 alt provider module registered (L2-006)
-  sp --> handler : implementation
-  handler -> impl : Call in-process
-  impl --> handler : result
-  handler --> app : exit code 0
+  sp --> action : implementation
+  action -> impl : Call in-process
+  impl --> action : result
+  action --> app : exit code 0
 else no provider registered
-  sp --> handler : MissingCapabilityException
-  handler --> app : exception propagates
+  sp --> action : InvalidOperationException naming ICapability
+  action --> app : exception propagates
   app --> shell : stderr names capability, exit code 1
 end
 @enduml

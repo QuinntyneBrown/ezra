@@ -8,13 +8,11 @@ Estimated for an intermediate C#/.NET developer who knows `dotnet` tooling and d
 
 | Work item | Hours |
 |-----------|------:|
-| `IEzraModule`, `ICommandHandler<TOptions>` in `Ezra.Abstractions` | 2 |
-| `EzraApp` composition of services and commands | 3 |
-| `ModuleRegistry` duplicate-name check | 1 |
-| `GetCapability<T>` and `MissingCapabilityException` mapping | 2 |
+| `IEzraModule` in `Ezra.Abstractions` | 1 |
+| `EzraApp` composition of services and commands, duplicate-name check | 4 |
 | Acceptance tests with test-only modules: registration, duplicate names, capability present and missing | 5 |
 | Startup timing test for `ezra --help` median under 300 ms | 2 |
-| **Total** | **15** |
+| **Total** | **12** |
 
 ## Minimal scope
 
@@ -26,5 +24,4 @@ Minimal scope total: **9 hours**.
 
 | Descope | What is lost | Hours saved |
 |---------|--------------|------------:|
-| `GetCapability<T>` and its error mapping | A missing capability surfaces as a raw DI exception with exit code 2 | 4 |
 | Startup timing test | L2-017 criterion 1 is verified by hand | 2 |

@@ -44,9 +44,7 @@ class ScaffoldTransaction {
 class AgentInstructionsGenerator
 class SkillCopier
 interface IEzraModule
-interface "ICommandHandler<ScaffoldOptions>" as H
 ScaffoldModule ..|> IEzraModule
-ScaffoldCommandHandler ..|> H
 ScaffoldOptions --> Backend
 ScaffoldCommandHandler ..> ScaffoldOptions
 ScaffoldCommandHandler --> ProjectNameValidator

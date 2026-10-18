@@ -21,7 +21,7 @@ This feature owns the command itself: its options, name validation, the no-overw
   - `Option<bool> --force` — allows writing into a non-empty target folder.
 - **`ScaffoldOptions`** — record bound from the parse result: `Name`, `Backend`, `OutputDirectory`, `SkillsSource`, `Force`.
 - **`Backend`** — enum with one member, `Node`. Its display name is `Node.js`.
-- **`ScaffoldCommandHandler`** — implements `ICommandHandler<ScaffoldOptions>`. It validates, guards, opens a transaction, generates instructions, copies skills, commits, and prints `Created <path> with <n> skills`.
+- **`ScaffoldCommandHandler`** — is resolved from the container only when `scaffold` runs. `HandleAsync(ScaffoldOptions, ct)` returns the exit code. It validates, guards, opens a transaction, generates instructions, copies skills, commits, and prints `Created <path> with <n> skills`.
 - **`ProjectNameValidator`** — checks the name against `^[A-Za-z0-9_][A-Za-z0-9_.-]{0,99}$`. It rejects Windows reserved device names (`CON`, `PRN`, `AUX`, `NUL`, `COM1`–`COM9`, `LPT1`–`LPT9`, case-insensitive, with or without an extension). It throws `EzraUsageException` explaining the rule (L2-013).
 - **`TargetFolderGuard`** — resolves `Path.GetFullPath(Path.Combine(output, name))`. If the folder exists, is not empty, and `--force` is absent, it throws `EzraUsageException` suggesting `--force` (L2-014).
 - **`ScaffoldTransaction`** — `IAsyncDisposable`. It records whether the target folder existed before the run. `Commit()` marks success. Disposal without commit deletes the target folder only if the run created it (L2-016).

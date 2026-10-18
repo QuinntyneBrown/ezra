@@ -36,12 +36,8 @@ class ExceptionMapper {
   +RunAsync(action: Func<CancellationToken, Task<int>>, ct: CancellationToken): Task<int>
 }
 class EzraUsageException
-class MissingCapabilityException
-class DuplicateCommandException
 ConsoleReporter ..|> IReporter
 ConsoleReporter --> Verbosity
-EzraUsageException <|-- MissingCapabilityException
-EzraUsageException <|-- DuplicateCommandException
 ExceptionMapper ..> ExitCodes : returns
 ExceptionMapper ..> IReporter : reports errors
 @enduml

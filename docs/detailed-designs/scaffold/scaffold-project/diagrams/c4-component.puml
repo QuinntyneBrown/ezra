@@ -5,7 +5,7 @@ title Components — Scaffold a project
 
 Container_Boundary(scaffold, "Ezra.Scaffold") {
   Component(module, "ScaffoldModule", "IEzraModule", "Registers services, builds the scaffold command")
-  Component(handler, "ScaffoldCommandHandler", "ICommandHandler", "Orchestrates one scaffold run")
+  Component(handler, "ScaffoldCommandHandler", "C# class", "Orchestrates one scaffold run")
   Component(validator, "ProjectNameValidator", "C# class", "Name rules (L2-013)")
   Component(guard, "TargetFolderGuard", "C# class", "No overwrite without --force (L2-014)")
   Component(tx, "ScaffoldTransaction", "C# class", "Removes partial output (L2-016)")

@@ -14,7 +14,7 @@ Container_Boundary(abs, "Ezra.Abstractions") {
   Component(usage, "EzraUsageException", "Exception", "Usage and validation errors")
 }
 Container_Boundary(scaffold, "Ezra.Scaffold") {
-  Component(handler, "ScaffoldCommandHandler", "ICommandHandler", "Reports steps and throws on failure")
+  Component(handler, "ScaffoldCommandHandler", "C# class", "Reports steps and throws on failure")
 }
 Rel(handler, ireporter, "Reports through")
 Rel(handler, usage, "Throws")

@@ -12,15 +12,12 @@ The host composes modules; modules never see each other. Adding a tool is two ed
 
 ## Description
 
-- **`IEzraModule`** (`Ezra.Abstractions`) — the module contract.
-  - `string Name` — the module's top-level command name.
-  - `void ConfigureServices(IServiceCollection services)` — registers the module's handlers and services. It shall perform no I/O.
-  - `Command CreateCommand(IServiceProvider services)` — builds the command subtree. Each action resolves its handler from `services` only when invoked, so building the tree does no work beyond allocating command objects (L2-017).
-- **`ICommandHandler<TOptions>`** (`Ezra.Abstractions`) — `Task<int> HandleAsync(TOptions options, CancellationToken ct)`. A command action binds its `ParseResult` to `TOptions`, resolves the handler and calls it.
-- **`Program.Modules`** (`src/Ezra/Program.cs`) — the explicit list of modules, for example `new ScaffoldModule()`. Registration is explicit, not reflection-based, so startup does no assembly scanning.
-- **`ModuleRegistry`** (`src/Ezra`) — validates the module list. If two modules share a `Name`, it throws `DuplicateCommandException` naming both module types and the command; the host reports it and returns exit code `1` (L2-005 criterion 3).
-- **`EzraApp`** — calls `ConfigureServices` on every module, adds host services (`IReporter`), builds one `ServiceProvider`, then calls `CreateCommand` on every module and adds each result to the root.
-- **`ServiceProviderExtensions.GetCapability<T>()`** (`Ezra.Abstractions`) — resolves capability `T`. If no module registered `T`, it throws `MissingCapabilityException(typeof(T))`, which the host reports as `Capability 'T' is not available` with exit code `1` (L2-006 criterion 2).
+- **`IEzraModule`** (`src/Ezra.Abstractions/IEzraModule.cs`) — the module contract.
+  - `void ConfigureServices(IServiceCollection services)` — registers the module's services. It shall perform no I/O.
+  - `Command CreateCommand(IServiceProvider services)` — builds the module's one top-level `System.CommandLine` command and its subcommands. Each action resolves its services from `services` only when invoked, so building the tree does no work beyond allocating command objects (L2-017).
+- **`Program`** (`src/Ezra/Program.cs`) — holds the explicit array of modules, for example `new ScaffoldModule()`. Registration is explicit, not reflection-based, so startup does no assembly scanning.
+- **`EzraApp`** (`src/Ezra/EzraApp.cs`) — `RunAsync(args, output, error, ct)` calls `ConfigureServices` on every module and builds one `ServiceProvider`. It then calls `CreateCommand` on every module and adds each command to the `RootCommand`. When two modules return a command with the same name, it writes `Modules <A> and <B> both declare the top-level command '<name>'.` to stderr and returns exit code `1` (L2-005 criterion 3). Otherwise it parses `args` and invokes the matched action.
+- **Capabilities** — a capability is a service interface published in `Ezra.Abstractions`. The providing module registers its implementation in `ConfigureServices`. The consuming module resolves the interface with `GetRequiredService<T>()` from the shared container, in-process. When no module provides it, the resolution error names the interface and the exit code is `1` (L2-006 criterion 2); report-results replaces the stack trace with a one-line message.
 - **Dependency rule** — each `Ezra.<Tool>.csproj` references only `Ezra.Abstractions` and external packages. Review enforces the rule; no test asserts project structure.
 - **Capability example** — none exists yet. The first capability is introduced by the first tool that needs one.
 
@@ -50,24 +47,24 @@ The host references each tool module; tool modules reference only `Ezra.Abstract
 
 ### Components
 
-`EzraApp` reads the module list, `ModuleRegistry` validates it, and one service container serves every module's handlers.
+`EzraApp` reads the module list, rejects duplicate command names, and builds one service container that serves every module's handlers.
 
 ![C4 component view for register tool modules](diagrams/c4-component.png)
 
 ### Class structure
 
-Modules implement `IEzraModule`; handlers implement `ICommandHandler<TOptions>`; a consumer module depends on a capability interface, never on the providing module.
+Modules implement `IEzraModule`; `EzraApp` composes them; a consumer module depends on a capability interface, never on the providing module.
 
 ![Class diagram for register tool modules](diagrams/class-structure.png)
 
 ### Behaviour — compose modules at startup
 
-The host validates names, gathers every module's services into one container, then builds the command tree without resolving any handler (L2-005, L2-017).
+The host gathers every module's services into one container, builds the command tree without resolving any handler service, and rejects duplicate top-level names (L2-005, L2-017).
 
 ![Sequence diagram for compose modules at startup](diagrams/sequence-startup.png)
 
 ### Behaviour — call another module's capability
 
-A consumer handler resolves a capability interface through the shared container; a missing provider yields exit code `1` (L2-006).
+A consumer action resolves a capability interface through the shared container; a missing provider yields exit code `1` (L2-006).
 
 ![Sequence diagram for call another module's capability](diagrams/sequence-capability.png)

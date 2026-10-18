@@ -12,7 +12,7 @@ Tool modules do not write to the console directly. They report through `IReporte
 ## Description
 
 - **`ExitCodes`** (`Ezra.Abstractions`) — constants `Success = 0`, `UsageError = 1`, `RuntimeFailure = 2`, `Cancelled = 130`.
-- **`EzraUsageException`** (`Ezra.Abstractions`) — thrown by handlers for invalid input that the parser cannot detect, for example an invalid project name. The host maps it to exit code `1`. `MissingCapabilityException` and `DuplicateCommandException` derive from it.
+- **`EzraUsageException`** (`Ezra.Abstractions`) — thrown by handlers for invalid input that the parser cannot detect, for example an invalid project name. The host maps it to exit code `1`.
 - **`IReporter`** (`Ezra.Abstractions`) — `Info(string)`, `Verbose(string)`, `Warning(string)`, `Error(string)`. Info and verbose lines go to stdout; warnings and errors go to stderr.
 - **`ConsoleReporter`** (`src/Ezra`) — the single `IReporter` implementation. It suppresses `Info` under `--quiet`, writes `Verbose` only under `--verbose`, and writes ANSI colour only when stdout is a terminal (`Console.IsOutputRedirected` is false) and `NO_COLOR` is unset (L2-008).
 - **Global options** — `--verbose` and `--quiet` are `Option<bool>` with `Recursive = true` on the root, so every command accepts them. A validator on the root rejects both together with exit code `1` (L2-008 criterion 4).

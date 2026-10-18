@@ -4,7 +4,7 @@ LAYOUT_WITH_LEGEND()
 title Components — Generate agent instructions
 
 Container_Boundary(scaffold, "Ezra.Scaffold") {
-  Component(handler, "ScaffoldCommandHandler", "ICommandHandler", "Calls the generator")
+  Component(handler, "ScaffoldCommandHandler", "C# class", "Calls the generator")
   Component(gen, "AgentInstructionsGenerator", "C# class", "Renders and writes both files")
   Component(loader, "TemplateLoader", "C# class", "Reads embedded resources")
   Component(tpl, "Templates/AGENTS.md", "Embedded resource", "Template with two tokens")

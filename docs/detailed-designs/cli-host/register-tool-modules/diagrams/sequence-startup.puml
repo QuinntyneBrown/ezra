@@ -16,27 +16,22 @@ end box
 box "Backend — Ezra host application" #D1FADF
   participant "Program" as program
   participant "EzraApp" as app
-  participant "ModuleRegistry" as registry
-  participant "ConsoleReporter" as reporter
 end box
 box "Backend — Ezra.Scaffold module" #ECFDF3
   participant "ScaffoldModule" as mod
 end box
 dev -> shell : ezra <any command>
 shell -> program : Main(args)
-program -> app : new EzraApp(Modules)
-app -> registry : Validate(modules)
-alt duplicate top-level name (L2-005)
-  registry --> app : DuplicateCommandException
-  app -> reporter : Error naming both modules
-  app --> program : exit code 1
+program -> app : new EzraApp(modules).RunAsync(args)
+app -> mod : ConfigureServices(services), no I/O (L2-017)
+app -> app : Build ServiceProvider
+app -> mod : CreateCommand(provider), no service resolved (L2-017)
+mod --> app : scaffold Command subtree
+alt two modules return the same command name (L2-005)
+  app --> program : stderr names both modules, exit code 1
 else names unique
-  registry --> app : ok
-  app -> mod : ConfigureServices(services), no I/O (L2-017)
-  app -> app : Build ServiceProvider
-  app -> mod : CreateCommand(provider), no handler resolved (L2-017)
-  mod --> app : scaffold Command subtree
   app -> app : Parse and invoke matched action
   app --> program : exit code
 end
+program --> shell : exit code
 @enduml
