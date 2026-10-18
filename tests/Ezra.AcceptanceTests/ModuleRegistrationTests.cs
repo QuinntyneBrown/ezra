@@ -26,6 +26,21 @@ public sealed class ModuleRegistrationTests
         Assert.Equal("hello", run.StdOut.Trim());
     }
 
+    [Fact]
+    public async Task Each_module_resolves_its_own_services()
+    {
+        // Given two modules that each register a service their handler uses
+        IEzraModule[] modules = [new ServiceModule("first", "one"), new ServiceModule("second", "two")];
+
+        // When each module's command runs
+        var first = await InProcess.RunAsync(modules, "first");
+        var second = await InProcess.RunAsync(modules, "second");
+
+        // Then each handler gets its own module's service
+        Assert.Equal("one", first.StdOut.Trim());
+        Assert.Equal("two", second.StdOut.Trim());
+    }
+
     private sealed class GreetModule : IEzraModule
     {
         public void ConfigureServices(IServiceCollection services) { }
@@ -37,4 +52,20 @@ public sealed class ModuleRegistrationTests
             return command;
         }
     }
+
+    private sealed class ServiceModule(string name, string text) : IEzraModule
+    {
+        public void ConfigureServices(IServiceCollection services) =>
+            services.AddKeyedSingleton(name, new Message(text));
+
+        public Command CreateCommand(IServiceProvider services)
+        {
+            var command = new Command(name);
+            command.SetAction(result =>
+                result.InvocationConfiguration.Output.WriteLine(services.GetRequiredKeyedService<Message>(name).Text));
+            return command;
+        }
+    }
+
+    private sealed record Message(string Text);
 }
