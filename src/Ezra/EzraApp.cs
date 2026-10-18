@@ -15,8 +15,17 @@ public sealed class EzraApp(IReadOnlyList<IEzraModule> modules)
         await using var provider = services.BuildServiceProvider();
 
         var root = new RootCommand("Ezra: a modular .NET command-line tool.");
+        var owners = new Dictionary<string, IEzraModule>();
         foreach (var module in modules)
-            root.Subcommands.Add(module.CreateCommand(provider));
+        {
+            var command = module.CreateCommand(provider);
+            if (!owners.TryAdd(command.Name, module))
+            {
+                error.WriteLine($"Modules {owners[command.Name].GetType().Name} and {module.GetType().Name} both declare the top-level command '{command.Name}'.");
+                return 1;
+            }
+            root.Subcommands.Add(command);
+        }
 
         var config = new InvocationConfiguration { Output = output, Error = error };
         return await root.Parse(args).InvokeAsync(config, ct);

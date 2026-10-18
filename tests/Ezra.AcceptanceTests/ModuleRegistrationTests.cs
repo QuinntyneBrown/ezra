@@ -41,6 +41,30 @@ public sealed class ModuleRegistrationTests
         Assert.Equal("two", second.StdOut.Trim());
     }
 
+    [Fact]
+    public async Task Duplicate_top_level_command_fails_startup()
+    {
+        // Given two modules that both declare the top-level command `greet`
+        IEzraModule[] modules = [new GreetModule(), new OtherGreetModule()];
+
+        // When Ezra starts
+        var result = await InProcess.RunAsync(modules, "greet");
+
+        // Then it fails with an error naming both modules and the command
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains(nameof(GreetModule), result.StdErr);
+        Assert.Contains(nameof(OtherGreetModule), result.StdErr);
+        Assert.Contains("'greet'", result.StdErr);
+        Assert.Empty(result.StdOut);
+    }
+
+    private sealed class OtherGreetModule : IEzraModule
+    {
+        public void ConfigureServices(IServiceCollection services) { }
+
+        public Command CreateCommand(IServiceProvider services) => new("greet");
+    }
+
     private sealed class GreetModule : IEzraModule
     {
         public void ConfigureServices(IServiceCollection services) { }
