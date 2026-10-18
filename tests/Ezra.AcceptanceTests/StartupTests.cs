@@ -9,6 +9,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Ezra.AcceptanceTests;
 
+// Runs alone: timing under parallel pack-and-install tests measures contention, not startup.
+[CollectionDefinition(nameof(StartupTests), DisableParallelization = true)]
+public sealed class StartupTimingCollection;
+
+[Collection(nameof(StartupTests))]
 public sealed class StartupTests
 {
     [Fact]
