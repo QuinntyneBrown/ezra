@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Ezra.Abstractions/Ezra.Abstractions.csproj" />
     <Project Path="src/Ezra/Ezra.csproj" />
   </Folder>
   <Folder Name="/tests/">

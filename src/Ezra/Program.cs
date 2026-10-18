@@ -1,4 +1,6 @@
-using System.CommandLine;
+using Ezra;
+using Ezra.Abstractions;
 
-var root = new RootCommand("Ezra: a modular .NET command-line tool.");
-return await root.Parse(args).InvokeAsync();
+IEzraModule[] modules = [];
+
+return await new EzraApp(modules).RunAsync(args, Console.Out, Console.Error);
